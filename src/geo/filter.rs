@@ -104,7 +104,7 @@ pub fn run(
 }
 
 /// Match an event against Toronto/GTA geo criteria.
-/// Tries strategies in order of confidence: postal code, bounding box, locality, region.
+/// Tries strategies in order of confidence: postal code, bounding box, toronto mention, locality, region.
 pub fn match_event(event: &ExtractedEvent) -> GeoMatchResult {
     // Strategy 1: Postal code
     if let Some(result) = match_postal_code(event) {
@@ -116,17 +116,53 @@ pub fn match_event(event: &ExtractedEvent) -> GeoMatchResult {
         return result;
     }
 
-    // Strategy 3: Locality names
+    // Strategy 3: "toronto" mentioned anywhere in the event
+    if let Some(result) = match_toronto_mention(event) {
+        return result;
+    }
+
+    // Strategy 4: Locality names
     if let Some(result) = match_locality(event) {
         return result;
     }
 
-    // Strategy 4: Region (weak signal)
+    // Strategy 5: Region (weak signal)
     if let Some(result) = match_region(event) {
         return result;
     }
 
     GeoMatchResult::no_match()
+}
+
+/// Check if "toronto" appears anywhere in the event — domain, URL, name, description, location fields.
+fn match_toronto_mention(event: &ExtractedEvent) -> Option<GeoMatchResult> {
+    let fields_to_check: Vec<Option<&str>> = vec![
+        Some(event.domain.as_str()),
+        Some(event.source_url.as_str()),
+        event.name.as_deref(),
+        event.description.as_deref(),
+        event.url.as_deref(),
+        event.organizer.as_deref(),
+        event.location.as_ref().and_then(|l| l.name.as_deref()),
+        event.location.as_ref().and_then(|l| l.address.as_ref()).and_then(|a| a.street.as_deref()),
+        event.location.as_ref().and_then(|l| l.address.as_ref()).and_then(|a| a.locality.as_deref()),
+        event.location.as_ref().and_then(|l| l.address.as_ref()).and_then(|a| a.region.as_deref()),
+        event.location.as_ref().and_then(|l| l.address.as_ref()).and_then(|a| a.country.as_deref()),
+    ];
+
+    for field in fields_to_check.into_iter().flatten() {
+        let lower = field.to_lowercase();
+        if lower.contains("toronto") {
+            return Some(GeoMatchResult {
+                matched: true,
+                confidence: 0.90,
+                strategy: MatchStrategy::Locality,
+                details: format!("Toronto mention in: \"{field}\""),
+            });
+        }
+    }
+
+    None
 }
 
 fn match_postal_code(event: &ExtractedEvent) -> Option<GeoMatchResult> {
