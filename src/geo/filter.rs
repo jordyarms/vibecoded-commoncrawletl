@@ -140,6 +140,12 @@ fn match_postal_code(event: &ExtractedEvent) -> Option<GeoMatchResult> {
 
     let postal_upper = postal.trim().to_uppercase().replace(' ', "");
 
+    // Validate Canadian postal code format: A1A1A1 (letter-digit-letter-digit-letter-digit)
+    // This filters out UK codes (e.g. M1 4PW, M15 6AA) and other non-Canadian formats
+    if !is_canadian_postal(&postal_upper) {
+        return None;
+    }
+
     // Use char-based extraction to avoid panicking on non-ASCII input
     let fsa: String = postal_upper.chars().take(3).collect();
     if fsa.chars().count() < 3 {
@@ -268,6 +274,25 @@ fn match_region(event: &ExtractedEvent) -> Option<GeoMatchResult> {
     }
 
     None
+}
+
+/// Check if a postal code (already uppercased, spaces removed) matches Canadian format.
+/// Canadian: A1A1A1 (letter-digit-letter-digit-letter-digit), exactly 6 chars.
+/// Also accept partial 3-char FSA (A1A) for incomplete data.
+fn is_canadian_postal(code: &str) -> bool {
+    let chars: Vec<char> = code.chars().collect();
+    match chars.len() {
+        3 => chars[0].is_ascii_alphabetic() && chars[1].is_ascii_digit() && chars[2].is_ascii_alphabetic(),
+        6 => {
+            chars[0].is_ascii_alphabetic()
+                && chars[1].is_ascii_digit()
+                && chars[2].is_ascii_alphabetic()
+                && chars[3].is_ascii_digit()
+                && chars[4].is_ascii_alphabetic()
+                && chars[5].is_ascii_digit()
+        }
+        _ => false,
+    }
 }
 
 #[cfg(test)]
