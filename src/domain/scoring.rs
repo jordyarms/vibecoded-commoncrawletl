@@ -151,11 +151,15 @@ struct DomainScore {
 }
 
 fn classify(avg_confidence: f64, gta_ratio: f64, gta_events: u64) -> &'static str {
-    if avg_confidence >= 0.8 && gta_ratio >= 0.5 && gta_events >= 5 {
+    // High confidence + many matches = confirmed regardless of ratio
+    // (most events lack geo fields, so ratio is naturally low for real Toronto sites)
+    if avg_confidence >= 0.85 && gta_events >= 10 {
         "Confirmed"
-    } else if avg_confidence >= 0.75 && gta_ratio >= 0.5 && gta_events >= 3 {
+    } else if avg_confidence >= 0.80 && gta_events >= 5 {
         "Likely"
-    } else if avg_confidence >= 0.5 && gta_ratio >= 0.1 {
+    } else if avg_confidence >= 0.75 && gta_events >= 3 {
+        "Likely"
+    } else if avg_confidence >= 0.5 && gta_events >= 2 {
         "Possible"
     } else if gta_events > 0 {
         "Review"
