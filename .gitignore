@@ -1,0 +1,18 @@
+/target
+
+# Pipeline outputs
+checkpoint.json
+domain_signals.csv
+part_priority.csv
+domain_scores.csv
+geofiltered_events.ndjson
+toronto_event_sources.csv
+toronto_event_samples.ndjson
+manual_review_queue.csv
+/extracted/
+
+# Input data (too large for git)
+*.gz
+*.nq
+Event_lookup.csv
+Event_domain_stats.csv
