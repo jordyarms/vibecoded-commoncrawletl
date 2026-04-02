@@ -139,11 +139,12 @@ fn match_postal_code(event: &ExtractedEvent) -> Option<GeoMatchResult> {
         .as_ref()?;
 
     let postal_upper = postal.trim().to_uppercase().replace(' ', "");
-    if postal_upper.len() < 3 {
+
+    // Use char-based extraction to avoid panicking on non-ASCII input
+    let fsa: String = postal_upper.chars().take(3).collect();
+    if fsa.chars().count() < 3 {
         return None;
     }
-
-    let fsa = &postal_upper[..3];
 
     // Check Toronto M* prefixes
     for prefix in TORONTO_POSTAL_PREFIXES {
