@@ -151,11 +151,11 @@ struct DomainScore {
 }
 
 fn classify(avg_confidence: f64, gta_ratio: f64, gta_events: u64) -> &'static str {
-    if avg_confidence >= 0.8 && gta_ratio >= 0.5 && gta_events >= 3 {
+    if avg_confidence >= 0.8 && gta_ratio >= 0.5 && gta_events >= 5 {
         "Confirmed"
-    } else if avg_confidence >= 0.6 && gta_ratio >= 0.3 {
+    } else if avg_confidence >= 0.75 && gta_ratio >= 0.5 && gta_events >= 3 {
         "Likely"
-    } else if avg_confidence >= 0.3 {
+    } else if avg_confidence >= 0.5 && gta_ratio >= 0.1 {
         "Possible"
     } else if gta_events > 0 {
         "Review"

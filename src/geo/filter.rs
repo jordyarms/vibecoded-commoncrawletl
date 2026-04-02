@@ -226,13 +226,22 @@ fn check_locality_name(text: &str) -> Option<GeoMatchResult> {
     let text_lower = text.to_lowercase();
 
     for &(name, confidence) in LOCALITY_NAMES {
-        if text_lower.contains(name) {
-            return Some(GeoMatchResult {
-                matched: true,
-                confidence,
-                strategy: MatchStrategy::Locality,
-                details: format!("Locality match: \"{name}\" in \"{text}\""),
-            });
+        if let Some(start) = text_lower.find(name) {
+            // Require word boundaries to avoid "york" matching "New York"
+            let end = start + name.len();
+            let before_ok = start == 0
+                || !text_lower.as_bytes()[start - 1].is_ascii_alphanumeric();
+            let after_ok = end >= text_lower.len()
+                || !text_lower.as_bytes()[end].is_ascii_alphanumeric();
+
+            if before_ok && after_ok {
+                return Some(GeoMatchResult {
+                    matched: true,
+                    confidence,
+                    strategy: MatchStrategy::Locality,
+                    details: format!("Locality match: \"{name}\" in \"{text}\""),
+                });
+            }
         }
     }
 

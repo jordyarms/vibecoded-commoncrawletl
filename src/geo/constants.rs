@@ -44,8 +44,6 @@ pub struct BoundingBox {
 
 impl BoundingBox {
     pub fn contains(&self, lat: f64, lon: f64) -> bool {
-        // Normalize longitude to negative (west)
-        let lon = if lon > 0.0 { -lon } else { lon };
         lat >= self.south && lat <= self.north && lon >= self.west && lon <= self.east
     }
 }
@@ -74,7 +72,7 @@ pub const LOCALITY_NAMES: &[(&str, f64)] = &[
     ("scarborough", 0.90),
     ("etobicoke", 0.90),
     ("east york", 0.90),
-    ("york", 0.75), // Lower confidence — could be York region or New York
+    // "york" removed — matches New York, York UK, Yorkshire, etc.
     ("downtown toronto", 0.95),
     ("midtown toronto", 0.95),
     // Toronto neighborhoods
@@ -96,17 +94,14 @@ pub const LOCALITY_NAMES: &[(&str, f64)] = &[
     ("bloor west village", 0.85),
     ("roncesvalles", 0.85),
     ("danforth", 0.85),
-    ("greektown", 0.85),
-    ("little italy", 0.75),
+    ("greektown toronto", 0.85),
+    // "little italy", "chinatown" removed — exist in many cities
     ("little portugal", 0.80),
-    ("chinatown", 0.70),
     ("distillery district", 0.90),
     ("st lawrence market", 0.90),
     ("harbourfront", 0.85),
-    ("waterfront", 0.70),
-    ("entertainment district", 0.80),
-    ("financial district", 0.75),
-    ("bay street", 0.75),
+    // "waterfront", "entertainment district", "financial district" removed — too generic
+    ("bay street toronto", 0.75),
     ("dundas square", 0.90),
     ("yonge-dundas", 0.90),
     ("cne grounds", 0.90),
@@ -121,21 +116,21 @@ pub const LOCALITY_NAMES: &[(&str, f64)] = &[
     ("richmond hill", 0.80),
     ("oakville", 0.85),
     ("burlington", 0.80),
-    ("hamilton", 0.75),
-    ("pickering", 0.80),
-    ("ajax", 0.75),
+    ("hamilton ontario", 0.80),
+    ("pickering", 0.75),
+    ("ajax ontario", 0.80),
     ("whitby", 0.80),
     ("oshawa", 0.85),
     ("newmarket", 0.80),
-    ("aurora", 0.75),
+    ("aurora ontario", 0.80),
     ("king city", 0.80),
     ("caledon", 0.80),
     ("milton", 0.80),
     ("halton hills", 0.80),
-    ("georgetown", 0.75),
+    ("georgetown ontario", 0.80),
     ("stouffville", 0.85),
     ("woodbridge", 0.80),
-    ("maple", 0.70),
+    ("maple ontario", 0.75),
     ("thornhill", 0.85),
     ("unionville", 0.85),
     ("port credit", 0.85),
